@@ -1,0 +1,180 @@
+{
+  "trends": {
+    "site_id": "1",
+  "api_url": "http://192.168.1.129:8082/iPAS_VegamViewService/VegamViewRestService.svc/GetHistoricalData",
+    "vegam_view_prod_api": "https://apps.vegam.co/iPAS_VegamViewService/VegamViewRestService.svc/GetHistoricalData",
+  "vmaint_api": "https://apps.vegam.co/Vegam_MaintenanceService/MaintenanceAnalyticsService.svc/DeployedSensors?siteID=26",
+  "vmaint_api_demo": "http://192.168.1.129:8090/Vegam_MaintenanceService/MaintenanceAnalyticsService.svc/DeployedSensors?siteID=1",
+    "payload_file": "payload.json",
+    "sensor_data_file": "sensor_data.json",
+    "sleep_duration_seconds": 10,
+    "sheets_before_sleep": 5,
+    "max_retries": 5,
+    "uuids_per_batch": 20,
+    "sleep_time_seconds": 5,
+    "report_start_hour": 3,
+    "report_start_minute": 30,
+    "report_start_second": 0,
+    "report_start_microsecond": 0,
+
+    "report_end_hour": 3,
+    "report_end_minute": 30,
+    "report_end_second": 0,
+    "report_end_microsecond": 0,
+    "report_days_offset": 1,
+    "percentage_threshold":5,
+
+
+    "area_check": ["Cooling Tower Area","CHP","Compressor House"],
+    "exclude_mac_ids": {
+      "CHP": [],
+      "Cooling Tower Area": ["F56A571956E8","E2DAA5165C47"],
+      "Compressor House": ["C086DF25BF9F", "E359564A4417"]
+    },
+    "start_time_report": "10/01/24 8:00 AM",
+    "end_time_report": "11/01/24 8:00 AM",
+  "data_window_startup_hr": 24,
+  "data_window_in_scheduler_hr": 1,
+    "report_input_vegam_logo": "C:\\Vegam\\Trends_alert\\input_report\\images\\vegam_logo.jpg",
+    "report_input_template": "C:\\Vegam\\Trends_alert\\input_report\\template\\template_final_2.docx",
+
+    "report_existing_path" : "C:\\Vegam\\Trends_alert\\test_output\\report_making.docx",
+    "pdf_path":"C:\\Vegam\\Trends_alert\\test_output\\report_making.pdf",
+    "machine_image_path": "C:\\Vegam\\Trends_alert\\input_report\\images\\Equipment_Images",
+    "machine_imange_unavailable_pic_path":"C:\\Vegam\\Trends_alert\\input_report\\images\\Equipment_Images\\no_image.jpeg",
+    "Moving_Average_plots_Path": "C:\\Vegam\\Trends_alert\\test_output\\Moving_Avg_Plots",
+    "output_report_path":"C:\\Vegam\\Trends_alert\\Report\\Daily"
+},
+"Mqtt":{
+    "broker_details": {
+        "broker_username": "vegam129",
+        "broker_password": "pass123",
+        "broker_ip": "192.168.1.129",
+        "broker_port": 1883,
+        "ssl_auth_enabled": 0,
+        "ssl_auth_details": {
+            "ca_certificate": "mqtt_ca_40.crt",
+            "client_certificate":"mqtt_client_40.crt",
+            "client_key_file": "mqtt_client_40.key",
+            "keyfile_password": "pass123"
+        }
+
+    },
+   "microservice_name" : "mqtt_service"
+
+},
+  "trend_generate": {
+  "data_Input_folder": "C:\\Vegam\\Trends_alert\\test_output\\temp_vrms_data",
+  "output_format": "jpeg",
+  "Chart_path": "C:\\Vegam\\Trends_alert\\input_report\\images\\Equipment_Images",
+  "Moving_Average_output_Path": "C:\\Vegam\\Trends_alert\\test_output\\Moving Average Data",
+  "Window_size": ["8280"],
+  "Warning":8,
+  "Critical":10,
+  "CHP":{"Warning":4,"Critical":6},
+  "Cooling Tower Area":{"Warning":8,"Critical":10},
+  "Compressor House":{"Warning":8,"Critical":10},
+  "trending_methods": [
+    {
+        "name": "Moving Average and Trendline",
+        "enabled": true,
+        "burst_per_day": [72],
+        "no_of_days":7
+    }
+
+  ]
+},
+"alert_payload": {
+  "sortType": "AlertTriggeredTime_desc",
+  "alertname": "Critical Alert",
+  "fromDate": "20240110",
+  "toDate": "20240118",
+  "alert_path": "C:\\Vegam\\Trends_alert\\critical alert.json",
+  "trend_path": "C:\\Vegam\\Trends_alert\\Trends.json"
+
+},
+  "scheduler_data": {
+    "upload_pdf_path": "C:\\Vegam\\Trends_alert\\Report\\Daily",
+    "upload_file_list": ["CHP.pdf", "Cooling Tower Area.pdf", "Compressor House.pdf"],
+    "scheduler_facade_timing": "14:40",
+    "scheduler_email_timing": "15:20",
+    "sender_email_vegam" : "vMaint4Support@vegam.co",
+    "sender_password_vegam": "V4MS@#$2023Nov",
+    "sender_email_test" : "surajbarikoptional@gmail.com",
+    "sender_password_test": "xarcpsvwbxpgadyx",
+    "smtp_server_gmail": "smtp.gmail.com",
+    "smtp_server_outlook": "smtp.office365.com",
+    "email_subject":"Daily Report of All Locations",
+    "mail_context":"Please find the attached daily summary report.",
+    "mail_id_list": [
+      "pradeep.pandey@vedanta.co.in",
+      "shishir.verma@vedanta.co.in",
+      "abhishekb.singh@vedanta.co.in",
+      "aashima.jain@vedanta.co.in",
+      "aatif.mohsin@vedanta.co.in",
+      "sangeet.sahu@vedanta.co.in",
+      "manish.lakhera@vedanta.co.in",
+      "hadees.siddique@vedanta.co.in",
+      "subhadip.banerjee@vedanta.co.in",
+      "ravindra.singh1@vedanta.co.in",
+      "sukanta.chattopadhyay6@vedanta.co.in",
+      "vinaykumar.singh@vedanta.co.in",
+      "mayank.shrivastava@vedanta.co.in",
+      "aniruddha.singh@vedanta.co.in",
+      "rajendra.sharma@vedanta.co.in",
+      "manas.mishra@vedanta.co.in",
+      "vivek.bhonsle@vedanta.co.in",
+      "deepak.parashar@ngsl.co.in",
+      "sreeramamahesh.kumartangu@vedanta.co.in",
+      "puranjay.singh@vedanta.co.in",
+      "mrityunjay.haldar@vedanta.co.in",
+      "rahul.choudhary@vedanta.co.in",
+      "mantosh.sinha@vedanta.co.in",
+      "anil.mishra@vedanta.co.in",
+      "ravindra.dubey@vedanta.co.in",
+      "skrathore@ngsl.co.in",
+      "durgesh@ngsl.co.in",
+      "vijayant.singh@ngsl.co.in",
+      "srawan.singh@ngsl.co.in",
+      "akastwar@ngsl.co.in",
+      "angsuman.majumdar@ngsl.co.in",
+      "suneet.rathore@ngsl.co.in",
+      "biswaranjan.rout@ngsl.co.in",
+      "janaswamy.murty@ngsl.co.in",
+      "d.mohan@ngsl.co.in",
+      "arindam.banerjee@ngsl.co.in",
+      "pankaj.kar@ngsl.co.in",
+      "nila.pattnayak@ngsl.co.in",
+      "himanshu@ngsl.co.in",
+      "amit.jana@ngsl.co.in",
+      "mkbaby@ngsl.co.in",
+      "anshuman@ngsl.co.in",
+      "kemparaju.mp@ngsl.co.in",
+      "kailash.gupta@vedanta.co.in",
+      "subhash.rathore@vedanta.co.in",
+      "sce1200balco@ngsl.co.in",
+      "sce540balco@ngsl.co.in"
+      ],
+
+    "cc_recipients_list": [
+      "mishrapm2018@gmail.com",
+      "ayushshukla1307@gmail.com",
+      "pradip.sen@spstechnoservice.com",
+      "kaushikdhara30@gmail.com",
+      "ayushshukla1307@gmail.com",
+      "service.trn@spstechnoservice.com",
+      "naveen.imam@gmail.com",
+      "spstechnoservice@gmail.com",
+      "chethan@vegam.co",
+      "saravanan@vegam.co",
+      "mallikarjun@vegam.co",
+      "aghera@vegam.co",
+      "prashanth.m@vegam.co",
+      "hemang@vegam.co",
+      "rajeevkumar@vegam.co",
+      "supriya@vegam.co",
+      "suraj@vegam.co"
+    ]
+
+  }
+}

@@ -1,0 +1,13 @@
+Vrms_mm/s,class1,class2,class3,class4
+0.28,good,good,good,good
+0.45,good,good,good,good
+0.71,good,good,good,good
+1.12,satisfactory,good,good,good
+1.8,satisfactory,satisfactory,good,good
+2.8,unsatisfactory,satisfactory,satisfactory,good
+4.5,unsatisfactory,unsatisfactory,satisfactory,satisfactory
+7.1,unacceptable,unsatisfactory,unsatisfactory,satisfactory
+11.2,unacceptable,unacceptable,unsatisfactory,unsatisfactory
+18,unacceptable,unacceptable,unacceptable,unsatisfactory
+28,unacceptable,unacceptable,unacceptable,unacceptable
+45,unacceptable,unacceptable,unacceptable,unacceptable

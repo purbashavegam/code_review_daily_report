@@ -1,0 +1,21 @@
+pandas
+requests
+pyinstaller
+PyMuPDF
+docx2pdf
+python-docx
+matplotlib
+scipy
+psutil
+xlsxwriter
+openpyxl
+pyarrow
+
+pyinstaller --onefile --additional-hooks-dir="D:\vegam_git_projects\Vegam_Analytics\custom_hooks" --add-data "D:\vegam_git_projects
+\Vegam_Analytics\Scripts\Trending\report\ReportGenerator.py;Scripts\Trending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ExtractMetaData.py;Scripts\T
+rending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ExtractSensorData.py;Scripts\Trending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\S
+cripts\Trending\report\TrendGenerator.py;Scripts\Trending\report" --hidden-import=requests --hidden-import=docx --hidden-import=fitz --hidden-import=pandas --hidden-import=docx2pdf --hidd
+en-import=psutil --hidden-import=matplotlib --hidden-import=install --hidden-import=xlsxwriter --hidden-import=openpyxl --hidden-import=scipy --clean "D:\vegam_git_projects\Vegam_Analytic
+s\Scripts\Trending\report\ReportGeneratorFacade.py"
+
+pyinstaller --onefile --additional-hooks-dir="D:\vegam_git_projects\Vegam_Analytics\custom_hooks" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ReportGenerator.py;Scripts\Trending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ExtractMetaData.py;Scripts\Trending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ExtractSensorData.py;Scripts\Trending\report" --add-data "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\TrendGenerator.py;Scripts\Trending\report" --hidden-import=requests --hidden-import=docx --hidden-import=fitz --hidden-import=pandas --hidden-import=docx2pdf --hidden-import=psutil --hidden-import=matplotlib --hidden-import=install --hidden-import=xlsxwriter --hidden-import=openpyxl --hidden-import=scipy --clean "D:\vegam_git_projects\Vegam_Analytics\Scripts\Trending\report\ReportGeneratorFacade.py"

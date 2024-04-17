@@ -1,0 +1,20 @@
+
+
+{
+    "broker_details": {
+        "broker_username": "",
+        "broker_password": "",
+        "broker_ip": "192.168.4.40",
+        "broker_port": 8883,
+        "ssl_auth_enabled": 1,
+        "ssl_auth_details": {
+            "ca_certificate": "mqtt_ca_40.crt",
+            "client_certificate":"mqtt_client_40.crt",
+            "client_key_file": "mqtt_client_40.key",
+            "keyfile_password": "pass123"
+        }
+    
+    },
+   "microservice_name" : "Velo_fft_microservice"
+
+}

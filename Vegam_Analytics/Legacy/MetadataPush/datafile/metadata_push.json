@@ -1,0 +1,21 @@
+{
+    "token": "305eb785495c428a902759f59a8a7158",
+    "data": [
+        {
+            "uniquename": "2",
+            "group": "",
+            "property": {
+                "key": [
+                    "samplingfrequency",
+                    "windowsize",
+                    "numberofsamples"
+                ],
+                "value": [
+                    ["1600"],
+                    ["256"],
+                    ["4096"]
+                ]
+            }
+        }
+    ]
+}

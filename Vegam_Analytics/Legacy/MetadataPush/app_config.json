@@ -1,0 +1,5 @@
+{
+    "metadata_api_info" : {
+        "base_url" : "http://192.168.2.72:8086/mssapi/metadatastore/"
+    }
+}

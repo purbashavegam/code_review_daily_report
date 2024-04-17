@@ -1,0 +1,13 @@
+pandas
+requests
+pyinstaller
+PyMuPDF
+docx2pdf
+python-docx
+matplotlib
+scipy
+psutil
+xlsxwriter
+openpyxl
+pyarrow
+schedule
