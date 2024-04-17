@@ -1,45 +1,47 @@
 # 6/10/23 12:49 PM 00000
 # 22/11/23 10:51 AM 00000
-import io
-from PIL import Image
-import os
+# import io
+#
+# import docx
+# from PIL import Image
+# import os
+import logging
 from docx2pdf import convert
 
-from docx.enum.text import WD_TAB_ALIGNMENT
+# from docx.enum.text import WD_TAB_ALIGNMENT
 
-import re
+# import re
 import fitz
 import os
 import shutil
 
-import logging
 
-from docx.oxml import parse_xml
-from docx.shared import Inches
+# from docx.oxml import parse_xml
+# from docx.shared import Inches
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx import Document
-from docx.shared import Pt, RGBColor
+from docx.shared import Pt
 # from docx.shared import Pt
 import pandas as pd
-from docx.shared import Inches, Cm
+from docx.shared import Inches
 from docx.oxml import OxmlElement, ns
-from docx.oxml.ns import qn
-import json
+# from docx.oxml.ns import qn
+# import json
 import numpy as np
 from numpy import nan
-from scipy.stats import linregress
-import matplotlib.pyplot as plt
+# from scipy.stats import linregress
+# import matplotlib.pyplot as plt
 import matplotlib
 from docx.shared import RGBColor
 
 matplotlib.use('TkAgg')  # Use the TkAgg backend (or another suitable one)
-import time
+# import time
+# from datetime import datetime, timedelta
+# from docx.enum.style import WD_STYLE_TYPE
+# from docx.enum.text import WD_ALIGN_PARAGRAPH
 from datetime import datetime, timedelta
-from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from datetime import datetime, timedelta
-
+# from Scripts.Trending.report.logger_file import logger
 
 class DailyReportGenerator:
     def __init__(self, exist_file, pdf_path, original_template, vegam_logo, customer_name,
@@ -111,8 +113,8 @@ class DailyReportGenerator:
     def format_date(self, date_str):
         try:
             print(date_str, "00000")
-            input_date = datetime.strptime(date_str, "%d/%m/%y %I:%M %p")
-            # input_str, "%d/%m/%y %I:%M %p"
+            input_date = datetime.strptime(date_str, "%d/%m/%Y %H:%M:%S")
+            # input_str, "%d/%m/%Y %H:%M:%S"
             output_str = input_date.strftime("%d %B %Y")
             # date_obj = datetime.strptime(date_str, "%d %B %Y")
             return output_str  # .strftime("%d %b %Y")
@@ -145,7 +147,7 @@ class DailyReportGenerator:
 
                 duration = f"{formatted_start_time} – {formatted_end_time}"
 
-                title_text = f'\n\n\n\n\n{customer_name} \nCondition Monitoring Report - {self.area_check}\n       {duration}'
+                title_text = f'\n\n\n\n\n{customer_name} \nCondition Monitoring Report - {self.area_check}\n{duration}'
                 self.duplicate_and_add_title(self.original_file_path, self.existing_file_path, self.title_image_path)
                 self.add_title_to_existing_doc(self.existing_file_path, title_text)
 
@@ -206,6 +208,10 @@ class DailyReportGenerator:
 
             header_text = f"\n Daily Report: {formatted_start_time} to {formatted_end_time}"
             header_paragraph = doc.add_paragraph(header_text)
+
+            header_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER #skb
+            header_paragraph.alignment = WD_ALIGN_VERTICAL.CENTER
+
             run = header_paragraph.runs[0]
             run.font.size = Pt(18)
             run.font.bold = True
@@ -275,7 +281,13 @@ class DailyReportGenerator:
                                 run.font.size = Pt(11)  # Adjust font size as needed
                                 run.bold = True  # Make the text bold
                                 paragraph.alignment = 1  # Center alignment
+
+                                # cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER #skb
+
+
+
             table.alignment = 1
+
             table.cell(0, 0).width = Inches(1.5)
             self.list_of_equips_with_mac_id = equip_details_df_1['EquipmentID_mac_ID'].to_list()
             logging.info(f"{len(self.list_of_equips_with_mac_id)} length of list_of_equips_with_mac_id")
@@ -298,6 +310,7 @@ class DailyReportGenerator:
                                 if table.cell(equip_row, 0).text == input_dict.get('EquipmentName_MacID', ''):
 
                                     cell = table.cell(equip_row, 0)
+                                    cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER  # skb
 
                                     # Enable text wrapping for the first run in the first paragraph of the cell
                                     cell.paragraphs[0].runs[0].font.wrap_text = True
@@ -314,6 +327,8 @@ class DailyReportGenerator:
                                         table.cell(equip_row, sub_col_idx).paragraphs[
                                             0].alignment = 1  # Center alignment
 
+                                        # cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER #skb
+
                                         # Set the '% Data Beyond Critical' values in the next sub-column
                                         percent_beyond_critical_col = sub_col_idx + 1
                                         critical_column_name = f'{column_name}_% Data Beyond Critical'
@@ -329,9 +344,13 @@ class DailyReportGenerator:
                                         table.cell(equip_row, percent_beyond_critical_col).paragraphs[
                                             0].alignment = 1  # Center alignment
 
+                                        # cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER #skb
+
+
                                         # print("before if type percent_beyond_critical_value - ",
                                         #       type(percent_beyond_critical_value))
-                                        if percent_beyond_critical_value is not None and percent_beyond_critical_value > self.percentage_threshold:
+                                        if percent_beyond_critical_value not in ["OFF", "-", "nan", "NaN", None, np.NaN, nan,
+                                                                                               '<NA>'] and percent_beyond_critical_value > self.percentage_threshold:
 
                                             cell = table.cell(equip_row, percent_beyond_critical_col)  # Access the correct cell
                                             run = cell.paragraphs[0].runs[0]
@@ -342,7 +361,8 @@ class DailyReportGenerator:
                                         # print("after if type percent_beyond_critical_value - ",type(percent_beyond_critical_value)) #skb
 
                                         # print("before if type value - ", type(value))  # skb
-                                        if isinstance(value, (int,float)) and value is not None and value is not nan and value > self.critical:
+                                        if isinstance(value, (int,float)) and value not in ["OFF", "-", "nan", "NaN", None, np.NaN, nan,
+                                                                                               '<NA>'] and value is not nan and value > self.critical:
                                             cell = table.cell(equip_row,
                                                               sub_col_idx)  # Access the correct cell
                                             run = cell.paragraphs[0].runs[0]
@@ -356,6 +376,38 @@ class DailyReportGenerator:
             else:
                 logging.error("Input dictionary list is None.")
 
+
+            footer_text = "\n\nNOTE:    No Data Available : ' - '\n"\
+                          "               Machine OFF : ' OFF '"
+            footer_paragraph = doc.add_paragraph(footer_text)
+
+            footer_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT  # skb
+            footer_paragraph.paragraph_format.space_after = Pt(0)
+            footer_paragraph.paragraph_format.space_before = Inches(0.25)
+            # footer_paragraph.alignment = WD_ALIGN_VERTICAL.CENTER
+
+            run = footer_paragraph.runs[0]
+            run.font.size = Pt(11)
+            run.font.bold = True
+            # footer_paragraph.paragraph_format.line_spacing = Pt(12)
+            highlight_text = "NOTE:"
+
+            for paragraph in doc.paragraphs:
+                if highlight_text in paragraph.text:
+                    # Split the paragraph text by the highlight_text
+                    parts = paragraph.text.split(highlight_text)
+
+                    # Create a new run for the first part (before the highlight_text)
+                    run = paragraph.runs[0]
+                    run.text = parts[0]
+
+                    # Add a new run for the highlight_text and set its color to red
+                    paragraph.add_run(highlight_text).font.color.rgb = RGBColor(255, 0, 0)
+
+                    # Create a new run for the rest of the paragraph (after the highlight_text)
+                    if len(parts) > 1:
+                        run = paragraph.add_run(parts[1])
+                        run.font.color.rgb = RGBColor(0, 0, 0)
 
         except Exception as e:
             import traceback
@@ -557,6 +609,7 @@ class DailyReportGenerator:
             convert(self.existing_file_path, self.pdf_path)
             self.add_page_numbers_to_contents(doc, self.pdf_path)
             doc.save(self.existing_file_path)
+
 
 
         except Exception as e:

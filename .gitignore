@@ -130,3 +130,7 @@ dmypy.json
 
 # Log lock
 *.lock
+
+#pycharm cache
+.idea/
+.idea

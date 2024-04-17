@@ -5,7 +5,9 @@ import logging
 import time
 from datetime import datetime
 from functools import wraps
-
+from Scripts.Trending.report.Util_Data import Util_Data
+# from check_test import machine_off_calc
+# from Scripts.Trending.report.logger_file import logger
 
 
 def retry(num_retry, sleep_sec):
@@ -29,7 +31,7 @@ def retry(num_retry, sleep_sec):
 
 class ExtractSensorData:
     # supriya
-    def __init__(self, vegamview_api_url):
+    def __init__(self, vegamview_api_url, current_area, json_data): #skb
         try:
             """
             Initialize the ExtractSensorData class with the VegamView API URL and ExtractMetaData instance.
@@ -39,6 +41,8 @@ class ExtractSensorData:
             - metadata_extractor (ExtractMetaData): An instance of ExtractMetaData for UUID extraction. #why???
             """
             self.vegamview_api_url = vegamview_api_url
+            self.current_area_name = current_area
+            self.json_config = json_data
         except Exception as e:
             logging.error(f"An error occurred in ExtractSensorData init: {str(e)}")
 
@@ -171,7 +175,7 @@ class ExtractSensorData:
                     sheet_name = f'{sheet_name_prefix}_{"_".join(tag_ids)}_{j}'  # Each sheet contains one set of 4 signal IDs
                     exploded_df.to_excel(writer, index=False, header=True, sheet_name=sheet_name)
 
-            print(f"Separated values saved to {output_file_path}")
+            logging.info(f"Separated values saved to {output_file_path}")
 
         # Check if there are any remaining signals not included in chunks of 4
         remaining_signals = extracted_data[len(chunks_of_4) * 4:]
@@ -208,7 +212,6 @@ class ExtractSensorData:
     def extract_v_and_t_from_api_data(self, api_data):  # using in alert
         extracted_data = []
         try:
-
             if isinstance(api_data, str):
                 api_data = json.loads(api_data)
                 # print("--------------------------")
@@ -226,7 +229,9 @@ class ExtractSensorData:
 
                     signal_id = vtq_entry.get("signalId")
                     v_values = [item.get("v") for item in vtq_data]
-                    t_values = [datetime.fromtimestamp(item.get("t") / 1000).strftime("%d/%m/%Y %I:%M %p") for item in
+                    # t_values = [datetime.fromtimestamp(item.get("t") / 1000).strftime("%d/%m/%Y %I:%M %p") for item in
+                    #             vtq_data]
+                    t_values = [datetime.fromtimestamp(item.get("t") / 1000).strftime("%d/%m/%Y %H:%M:%S") for item in
                                 vtq_data]
 
                     # print(v_values)
@@ -308,36 +313,55 @@ class ExtractSensorData:
             # print("chunk of 4 is ",len(chunks_of_4))
 
             if len(chunks_of_4) > 0:
+                combined_list = {}
                 for i, chunk in enumerate(chunks_of_4, start=1):
                     # print("i is",i)
+
+                    for j, entry in enumerate(chunk, start=1):
+                        # print(entry['t_values'])
+                        # print(entry['v_values'])
+                        df = pd.DataFrame({'DateTime': entry['t_values'], 'Value': entry['v_values']})
+                        # print(df) #skb
+                        # Extract tag_ids from the entry dictionary
+                        tag_ids = entry.get(
+                            "signalId")  # ('tag_ids', [])  # Adjust the key based on your actual data structure
+                        # print(tag_ids)
+                        name = "Undefined"
+                        if j == 1:
+                            name = "X_Axis"
+                        elif j == 2:
+                            name = "Y_Axis"
+                        elif j == 3:
+                            name = "Z_Axis"
+                        elif j == 4:
+                            name = "Temp"
+
+                        sheet_name = f'{mac_id}_{tag_ids}_{name}'  # Each sheet contains one set of 4 signal IDs
+                        exploded_df = df.explode('DateTime').explode('Value')
+                        if name != "Temp":
+                            exploded_df = exploded_df.rename(columns={'Value': f'C_VRMS_{sheet_name}'})
+                            combined_list[f'C_VRMS_{sheet_name}'] = exploded_df
+                        else:
+                            exploded_df = exploded_df.rename(columns={'Value': 'Value'})
+                            combined_list[sheet_name] = exploded_df
+                        # combined_list[sheet_name] = exploded_df
+                    print(combined_list)
+                    print(type(combined_list))
                     output_file_path = f'{output_file_prefix}_{mac_id}.xlsx'
-                    with pd.ExcelWriter(output_file_path, engine='xlsxwriter') as writer:
-                        for j, entry in enumerate(chunk, start=1):
-                            # print(entry['t_values'])
-                            # print(entry['v_values'])
-                            df = pd.DataFrame({'DateTime': entry['t_values'], 'Value': entry['v_values']})
-                            # print(df)
-                            exploded_df = df.explode('DateTime').explode('Value')
-
-                            # Extract tag_ids from the entry dictionary
-                            tag_ids = entry.get(
-                                "signalId")  # ('tag_ids', [])  # Adjust the key based on your actual data structure
-                            # print(tag_ids)
-
-                            if j == 1:
-                                name = "X_Axis"
-                            elif j == 2:
-                                name = "Y_Axis"
-                            elif j == 3:
-                                name = "Z_Axis"
-                            elif j == 4:
-                                name = "Temp"
-
-                            sheet_name = f'{mac_id}_{tag_ids}_{name}'  # Each sheet contains one set of 4 signal IDs
-                            exploded_df.to_excel(writer, index=False, header=True, sheet_name=sheet_name)
+                    try:
+                        # machine_off_calc(combined_list, output_file_path)
+                        util_class_call = Util_Data(self.json_config, self.current_area_name)
+                        util_class_call.machine_on_off_calculation(combined_list, output_file_path)
+                    except Exception as ex:
+                        logging.error(f"Error in util class {ex}")
+                    print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
+                    # combined_df = pd.concat(combined_list, ignore_index=True)
+                    # with pd.ExcelWriter(output_file_path, engine='xlsxwriter') as writer:
+                    #     combined_df.to_excel(writer, index=False, header=True, sheet_name=sheet_name)
                             # avg_value = pd.to_numeric(exploded_df['Value']).dropna().mean()
                             # print(avg_value,'avgvaliueeeeeeeeeeeeeeee')
 
+                    #skb
                     df_if = pd.read_excel(output_file_path)
                     # print(df_if,'df_if......................................................')
                     num_rows = df_if.shape[0]
@@ -369,5 +393,24 @@ class ExtractSensorData:
 
         except Exception as e:
             logging.error(f"An error occurred in ExtractSensorData save_data_to_excel_for_alert: {str(e)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

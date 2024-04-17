@@ -3,7 +3,7 @@ from functools import wraps
 import requests
 import logging
 import time
-
+# from Scripts.Trending.report.logger_file import logger
 # with open('ReportGenerator.json') as json_file:
 #     ReportGeneratorConfig = json.load(json_file)
 
@@ -2010,4 +2010,6 @@ class ExtractMetaData:
 
 # a = ExtractMetaData("https://apps.vegam.co/Vegam_MaintenanceService/MaintenanceAnalyticsService.svc/DeployedSensors?siteID=26",
 #                     1,"Cooling Tower Area")
-# a.get_metadata_from_api()
+# resp = a.get_axis_information()
+# print(type(resp))
+# print(resp)

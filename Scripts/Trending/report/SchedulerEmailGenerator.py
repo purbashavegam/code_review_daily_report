@@ -1,10 +1,10 @@
-# SchedulerEmailGenerator.py  this is main file ??
+# SchedulerEmailGenerator.py
 import json
 import os
 from datetime import datetime, timedelta
 import time
 import logging
-from logging.handlers import RotatingFileHandler
+# from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -15,33 +15,37 @@ import fitz
 import pytz
 import schedule
 from Scripts.Trending.report.ReportGeneratorFacade import ReportGeneratorFacade
+from Scripts.Trending.report.logger_file import logger
 
-log_folder_path = 'C:\\Vegam\\Trends_alert\\logs'
-# log_folder_path = 'logs'
-if not os.path.exists(log_folder_path):
-    try:
-        os.makedirs(log_folder_path)
-        logging.info(f'Created "{log_folder_path}" folder.')
-    except Exception as e:
-        logging.info(f'Error creating "{log_folder_path}" folder: {str(e)}')
-
-logger = logging.getLogger()
-log_format = '%(asctime)s - [%(filename)s::%(lineno)d] - %(levelname)12s - %(threadName)22s  - %(funcName)s -' \
-             ' %(message)s'
-logging.basicConfig(
-    format=log_format,
-    datefmt='%Y-%m-%d %H:%M:%S',
-    level=logging.DEBUG
-)
-
-file_handler = RotatingFileHandler(
-    'C:\\Vegam\\Trends_alert\\logs\\daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
-)
-# file_handler = RotatingFileHandler(
-#     'logs/daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# log_folder_path = 'C:\\Vegam\\Trends_alert\\logs'
+# # log_folder_path = 'logs'
+# if not os.path.exists(log_folder_path):
+#     try:
+#         os.makedirs(log_folder_path)
+#         logging.info(f'Created "{log_folder_path}" folder.')
+#     except Exception as e:
+#         logging.info(f'Error creating "{log_folder_path}" folder: {str(e)}')
+#
+# logger = logging.getLogger()
+# log_format = '%(asctime)s - [%(filename)s::%(lineno)d] - %(levelname)12s - %(threadName)22s  - %(funcName)s -' \
+#              ' %(message)s'
+# logging.basicConfig(
+#     format=log_format,
+#     datefmt='%Y-%m-%d %H:%M:%S',
+#     level=logging.DEBUG
 # )
-file_handler.setFormatter(logging.Formatter(log_format))
-logger.addHandler(file_handler)
+#
+# # file_handler = RotatingFileHandler(
+# #     'C:\\Vegam\\Trends_alert\\logs\\daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# # )
+#
+# file_handler = TimedRotatingFileHandler(f'C:\\Vegam\\Trends_alert\\logs\\daily_report.log', when='h', interval=24, backupCount=365)
+#
+# # file_handler = RotatingFileHandler(
+# #     'logs/daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# # )
+# file_handler.setFormatter(logging.Formatter(log_format))
+# logger.addHandler(file_handler)
 
 
 # trends_json = "C:\\Trends_services\\Trends.json"
@@ -79,7 +83,7 @@ class SchedulerEmailGenerator:
 
             logger.info("The scheduler started waiting for the report generator scheduled times...")
             schedule.every().day.at(scheduler_facade_timing).do(self.scheduler_for_facade_running)
-            # schedule.every(30).minutes.do(self.scheduler_for_facade_running)
+            # schedule.every(10).seconds.do(self.scheduler_for_facade_running)
             logger.info("The scheduler started waiting for the email scheduled times...")
             schedule.every().day.at(scheduler_email_timing).do(self.email_report_to_send_excel)
             # schedule.every(40).minutes.do(self.email_report_to_send_excel)
@@ -139,7 +143,7 @@ class SchedulerEmailGenerator:
         except Exception as e:
             logger.error(f"Error in starting the scheduler for ReportGeneratorFacade: {e}")
 
-    import fitz  # PyMuPDF
+    # import fitz  # PyMuPDF
 
     def is_pdf_blank(self,pdf_path):
         try:
@@ -200,7 +204,7 @@ class SchedulerEmailGenerator:
 
             folder_status_list = self.folder_availability_check(folder_path, file_list)
 
-            if len(folder_status_list) == 3:
+            if len(folder_status_list)==3:
                 logger.info("started mail service for")
                 sender_email = json_data["scheduler_data"]["sender_email_vegam"]  # personaltest
                 sender_password = json_data["scheduler_data"]["sender_password_vegam"]  # 'jnjatyvjqkfrlaqu'

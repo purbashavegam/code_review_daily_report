@@ -1,15 +1,16 @@
 import pandas as pd
 # import numpy as np
 # from pandas import to_datetime,DataFrame
-import matplotlib.pyplot as plt
-import json
-from numpy import nan, int64
+# import matplotlib.pyplot as plt
+# import json
+# from numpy import nan, int64
 import os
-from scipy.stats import linregress
-import datetime
-import logging
-from datetime import timedelta
-from matplotlib.ticker import MultipleLocator
+# from scipy.stats import linregress
+# import datetime
+# # import logger
+# from datetime import timedelta
+# from matplotlib.ticker import MultipleLocator
+from Scripts.Trending.report.logger_file import logger
 
 
 # import timedelta
@@ -22,15 +23,15 @@ class AverageCalculator:
             self.critical = critical
             self.area_folder_path = area_folder_path
 
-            logging.info(f"TrendGenerator instance initialized with MAC_ID: {self.mac_id}")
+            logger.info(f"TrendGenerator instance initialized with MAC_ID: {self.mac_id}")
         except Exception as e:
-            logging.error("Error in Trend generator class: " + str(e))
+            logger.error("Error in Trend generator class: " + str(e))
 
 
     def calculate_average_for_axis(self, sheet_data, axis_name):
         try:
             # Assuming sheet_data has a 'DateTime' column and a 'Value' column
-            sheet_data['DateTime'] = pd.to_datetime(sheet_data['DateTime'], format='%d/%m/%Y %I:%M %p')
+            sheet_data['DateTime'] = pd.to_datetime(sheet_data['DateTime'], format='%d/%m/%Y %H:%M %p')
 
             # Extract the correct axis name from the provided axis_name
             extracted_axis = axis_name.split('_')[-1]
@@ -42,13 +43,13 @@ class AverageCalculator:
                 result_data = pd.DataFrame({'Axis': [extracted_axis], 'Average_Value': [average_value]})
                 #print(result_data,'resultdataaaaaaaaaaaa line 37')
             else:
-                logging.info(f"No data available for the specified time range for axis {extracted_axis}.")
+                logger.info(f"No data available for the specified time range for axis {extracted_axis}.")
                 result_data = pd.DataFrame(columns=['Axis', 'Average_Value'])
 
             return result_data
 
         except Exception as e:
-            logging.error(f"Error in calculate_average_for_axis: {e}")
+            logger.error(f"Error in calculate_average_for_axis: {e}")
             return pd.DataFrame(columns=['Axis', 'Average_Value'])
 
     # def calculate_average_axis_wise(self, mac_id):
@@ -63,17 +64,17 @@ class AverageCalculator:
     #                 _, _, axis,_ = sheet_name.rsplit('_', 3)  # Extract axis from sheet name
     #                 #print(f"Sheet Name: {sheet_name}, Extracted Axis: {axis},macid:{mac_id}")
     #                 averages[axis] = self.calculate_average_for_axis(sheet_data, axis)['Average_Value'].mean()
-    #                 logging.info(f"Successfully calculated average for axis: {axis}")
+    #                 logger.info(f"Successfully calculated average for axis: {axis}")
     #
     #         return averages
     #
     #     except Exception as e:
-    #         logging.error(f"Error in calculate_average_axis_wise: {e}")
+    #         logger.error(f"Error in calculate_average_axis_wise: {e}")
 
     def calculate_percentage_beyond_critical(self, sheet_data, axis_name,mac_id):
         try:
             # Assuming sheet_data has a 'DateTime' column and a 'Value' column
-            sheet_data['DateTime'] = pd.to_datetime(sheet_data['DateTime'], format='%d/%m/%Y %I:%M %p')
+            sheet_data['DateTime'] = pd.to_datetime(sheet_data['DateTime'], format='%d/%m/%Y %H:%M %p')
             critical = self.critical
 
             # Extract the correct axis name from the provided axis_name
@@ -100,7 +101,7 @@ class AverageCalculator:
             print(f'error in calc_perc:{e}')
             traceback.print_exc()
 
-            logging.error(f"Error in calculate_percentage_beyond_critical: {e}")
+            logger.error(f"Error in calculate_percentage_beyond_critical: {e}")
 
             return 0  # Return 0 in case of an error or empty data
 
@@ -112,23 +113,37 @@ class AverageCalculator:
             df = pd.read_excel(excel_file_path, sheet_name=None)
 
             # Calculate average separately for each axis
+            last_three_sheets = list(df.keys())[-3:]
+
+            # Calculate average separately for each axis
             averages = {'MAC_ID': mac_id}
-            for sheet_name, sheet_data in df.items():
+            for sheet_name in last_three_sheets:
+                sheet_data = df[sheet_name]
+
                 if mac_id in sheet_name and '_' in sheet_name:
                     _, _, axis, _ = sheet_name.rsplit('_', 3)  # Extract axis from sheet name
-                    avg_value = self.calculate_average_for_axis(sheet_data, axis)['Average_Value'].mean()
-                    # Calculate percentage beyond critical for the current axis
-                    rounded_avg_value = round(avg_value, 2)  # Round to 2 decimal points
-                    averages[axis] = rounded_avg_value
+                    if sheet_data.empty and not df[f"C_VRMS_{sheet_name}"].empty:
+                        averages[axis] = "OFF"
+                        averages[f'{axis}_Percentage_Beyond_Critical'] = "OFF"
+                        logger.critical(f"Sensor mac id {mac_id} having empty data in only machineOFF scenario")
+                    elif sheet_data.empty and df[f"C_VRMS_{sheet_name}"].empty:
+                        averages[axis] = "-"
+                        averages[f'{axis}_Percentage_Beyond_Critical'] = "-"
+                        logger.critical(f"Sensor mac id {mac_id} having empty data in both excels for sensor OFF scenario")
+                    else:
+                        avg_value = self.calculate_average_for_axis(sheet_data, axis)['Average_Value'].mean()
+                        # Calculate percentage beyond critical for the current axis
+                        rounded_avg_value = round(avg_value, 2)  # Round to 2 decimal points
+                        averages[axis] = rounded_avg_value
 
-                    percentage_beyond_critical = self.calculate_percentage_beyond_critical(sheet_data, axis, mac_id)
-                    averages[f'{axis}_Percentage_Beyond_Critical'] = percentage_beyond_critical
-                    logging.info(f"Successfully calculated average for axis: {axis}")
+                        percentage_beyond_critical = self.calculate_percentage_beyond_critical(sheet_data, axis, mac_id)
+                        averages[f'{axis}_Percentage_Beyond_Critical'] = percentage_beyond_critical
+                        logger.info(f"Successfully calculated average for axis: {axis}")
 
             return averages
 
         except Exception as e:
-            logging.error(f"Error in calculate_average_axis_wise: {e}")
+            logger.error(f"Error in calculate_average_axis_wise: {e}")
 
     # def get_equipmentid(self, mac_id):
     #     combined_equipment_sensor_ids = self.list_mac_id_equips_weekly_report if len(

@@ -1,12 +1,12 @@
 # ReportGeneratorFacade.py
-from datetime import date, timedelta, datetime
-import pytz
-from datetime import datetime
+from datetime import timedelta
+# import pytz
+# from datetime import datetime
 
 # helps to communicate with other  4 classes and get report
 # run the file, get output --> this is goal
 import errno
-from docx.shared import Pt
+from docx.shared import Inches
 from docx import Document
 from Scripts.Trending.report.ExtractMetaData import ExtractMetaData
 from Scripts.Trending.report.ExtractSensorData import ExtractSensorData
@@ -18,41 +18,41 @@ from datetime import datetime
 import time
 import os
 import logging
-from logging.handlers import RotatingFileHandler
-import pytz
-import psutil
+# from logging.handlers import RotatingFileHandler
+# import pytz
+# import psutil
 from docx2pdf import convert
 import pandas as pd
-import sys
+# import sys
+from Scripts.Trending.report.logger_file import logger
 
 
-
-log_folder_path = 'C:\\Vegam\\Trends_alert\\logs'
-# log_folder_path = 'logs'
-if not os.path.exists(log_folder_path):
-    try:
-        os.makedirs(log_folder_path)
-        logging.info(f'Created "{log_folder_path}" folder.')
-    except Exception as e:
-        logging.error(f'Error creating "{log_folder_path}" folder: {str(e)}')
-
-logger = logging.getLogger()
-log_format = '%(asctime)s - [%(filename)s::%(lineno)d] - %(levelname)12s - %(threadName)22s  - %(funcName)s -' \
-             ' %(message)s'
-logging.basicConfig(
-    format=log_format,
-    datefmt='%Y-%m-%d %H:%M:%S',
-    level=logging.DEBUG
-)
-
-file_handler = RotatingFileHandler(
-    'C:\\Vegam\\Trends_alert\\logs\\daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
-)
-# file_handler = RotatingFileHandler(
-#     'logs/daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# log_folder_path = 'C:\\Vegam\\Trends_alert\\logs'
+# # log_folder_path = 'logs'
+# if not os.path.exists(log_folder_path):
+#     try:
+#         os.makedirs(log_folder_path)
+#         logging.info(f'Created "{log_folder_path}" folder.')
+#     except Exception as e:
+#         logging.error(f'Error creating "{log_folder_path}" folder: {str(e)}')
+#
+# logger = logging.getLogger()
+# log_format = '%(asctime)s - [%(filename)s::%(lineno)d] - %(levelname)12s - %(threadName)22s  - %(funcName)s -' \
+#              ' %(message)s'
+# logging.basicConfig(
+#     format=log_format,
+#     datefmt='%Y-%m-%d %H:%M:%S',
+#     level=logging.DEBUG
 # )
-file_handler.setFormatter(logging.Formatter(log_format))
-logger.addHandler(file_handler)
+#
+# file_handler = RotatingFileHandler(
+#     'C:\\Vegam\\Trends_alert\\logs\\daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# )
+# # file_handler = RotatingFileHandler(
+# #     'logs/daily_report.log', maxBytes=200 * 1024 * 1024, backupCount=10, mode='a'
+# # )
+# file_handler.setFormatter(logging.Formatter(log_format))
+# logger.addHandler(file_handler)
 
 
 
@@ -89,7 +89,7 @@ class ReportGeneratorFacade:
             self.moving_avg_plot_path = self.Trends_Config["trends"]["Moving_Average_plots_Path"]
             self.metadata_extractor = ExtractMetaData(self.Trends_Config["trends"]["vmaint_api"], self.cache_time,
                                                       self.area_check)
-            self.sensor_data_extract = ExtractSensorData(self.Trends_Config["trends"]["vegam_view_prod_api"])
+            self.sensor_data_extract = ExtractSensorData(self.Trends_Config["trends"]["vegam_view_prod_api"], self.area_check, self.Trends_Config) #skb
             self.outputs_folder_path = os.path.join(self.Trends_Config["trends"]["output_report_path"], starting_date)
 
             # Ensure the folder for the starting_date exists; create it if not
@@ -103,7 +103,7 @@ class ReportGeneratorFacade:
             # Construct the paths for report and PDF based on the area-specific folder
             new_doc_file_name = f'{self.area_check}.docx'
             self.existing_file_path= os.path.join(self.area_folder_path, new_doc_file_name)########report_existing_path
-            #print(self.existing_file_path,'222222222222222222222222222')
+            print(self.existing_file_path,'222222222222222222222222222')
 
             new_pdf_file_name = f'{self.area_check}.pdf'
             self.pdf_path = os.path.join(self.area_folder_path, new_pdf_file_name)##########report pdf path
@@ -280,7 +280,7 @@ class ReportGeneratorFacade:
                                                        mapping_result_dict.items()}
 
                                 result_list.append(mapping_result_dict)
-                                logger.info(f"{result_list} - final result list")
+                                # logger.info(f"{result_list} - final result list")
                             else:
                                 logger.info("Equipment MacID not matched")
                         else:
@@ -300,7 +300,7 @@ class ReportGeneratorFacade:
                     #
                     #     }
                     #     result_list.append(combined_dict)
-                logging.info(f"{result_list} result_list")
+                # logging.info(f"{result_list} result_list")
 
 
                 self.report_generate_obj.create_report_common(result_list)
@@ -310,6 +310,19 @@ class ReportGeneratorFacade:
                 self.report_generate_obj.content_page_works(self.doc)
 
                 self.doc.save(self.existing_file_path)
+                print("strated styling for spacing")
+                # doc = self.doc.Document(self.existing_file_path)
+                style = self.doc.styles['Normal']
+
+                # Set the spacing after each paragraph
+                style.paragraph_format.space_before = Inches(0.25)
+                for paragraph in self.doc.paragraphs:
+                    paragraph.style = style
+
+                print("styling done")
+                self.doc.save(self.existing_file_path)
+                print("file saved")
+
                 convert(self.existing_file_path)
                 #self.doc.close()
                 #self.doc.quit()
@@ -397,12 +410,12 @@ class ReportGeneratorFacade:
 
             # # global current_time #pm test
             # start_time = int(datetime.strptime(self.Trends_Config["trends"]['start_time_report'],
-            #                                    "%d/%m/%y %I:%M %p").timestamp() * 1000)
+            #                                    "%d/%m/%Y %H:%M:%S").timestamp() * 1000)
             # end_time = int(datetime.strptime(self.Trends_Config["trends"]['end_time_report'],
-            #                                  "%d/%m/%y %I:%M %p").timestamp() * 1000)
+            #                                  "%d/%m/%Y %H:%M:%S").timestamp() * 1000)
             logger.info(f"after time stamp - {start_time}, {end_time}")
-            # start_time =1704043800000# int(datetime.strptime(self.Trends_Config["trends"]['start_time_report'], "%d/%m/%y %I:%M %p").timestamp() * 1000)
-            # end_time =1704173400000# int(datetime.strptime(self.Trends_Config["trends"]['end_time_report'], "%d/%m/%y %I:%M %p").timestamp() * 1000)
+            # start_time =1704043800000# int(datetime.strptime(self.Trends_Config["trends"]['start_time_report'], "%d/%m/%Y %H:%M:%S").timestamp() * 1000)
+            # end_time =1704173400000# int(datetime.strptime(self.Trends_Config["trends"]['end_time_report'], "%d/%m/%Y %H:%M:%S").timestamp() * 1000)
             # cycle_start_time = int(time.time())
             # Get initial memory usage
             # initial_memory = psutil.virtual_memory().percent
@@ -451,7 +464,13 @@ class ReportGeneratorFacade:
                             {"signalIds": ordered_topic_values, "fromTime": start_time, "toTime": end_time}
                         ]
                     }
-                    # logger.info("Start getting data for sensor mac id:"+str(mac_id))
+                    # payload = [
+                    #                 {
+                    #                     "signalIds": ordered_topic_values,
+                    #                      "fromTime": start_time, "toTime": end_time
+                    #                 }
+                    #         ]
+                                                # logger.info("Start getting data for sensor mac id:"+str(mac_id))
                     logger.info(f"{payload}")
                     logger.info(
                         f"start of getting sensor data for  {mac_id} :----   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
